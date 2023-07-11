@@ -6,35 +6,37 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProductRepository struct {
-	db gorm.DB
+var ProductRepositoryInstant productRepository
+
+type productRepository struct {
+	db *gorm.DB
 }
 
-func NewRepository(db gorm.DB) ProductRepository {
-	return ProductRepository{
+func NewProductRepository(db *gorm.DB) {
+	ProductRepositoryInstant = productRepository{
 		db: db,
 	}
 }
 
-func (repo ProductRepository) GetAll() []models.Product {
+func (repo productRepository) GetAll() []models.Product {
 	var products []models.Product
 	repo.db.Find(&products)
 
 	return products
 }
 
-func (repo ProductRepository) Create(product models.Product) {
+func (repo productRepository) Create(product models.Product) {
 	repo.db.Create(&product)
 }
 
-func (repo ProductRepository) GetById(id uuid.UUID) models.Product {
+func (repo productRepository) GetById(id uuid.UUID) models.Product {
 	var product models.Product
 	repo.db.Find(&product, id)
 
 	return product
 }
 
-func (repo ProductRepository) Delete(id uuid.UUID) {
+func (repo productRepository) Delete(id uuid.UUID) {
 
 	var product models.Product
 	repo.db.Find(&product, id)

@@ -6,17 +6,16 @@ import (
 )
 
 type Product struct {
-	id          uuid.UUID
-	name        string
-	price       float64
-	createdDate time.Time
+	Id          uuid.UUID `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
+	Name        string    `gorm:"column:name"`
+	Price       float64   `gorm:"column:price"`
+	CreatedDate time.Time `gorm:"column:createdDate"`
 }
 
 func NewProduct(name string, price float64, releaseDate time.Time) Product {
 	return Product{
-		id:          uuid.New(),
-		name:        name,
-		price:       price,
-		createdDate: time.Now(),
+		Name:        name,
+		Price:       price,
+		CreatedDate: time.Now(),
 	}
 }
