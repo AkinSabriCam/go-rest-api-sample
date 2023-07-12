@@ -2,22 +2,19 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/google/uuid"
+	"go-rest-api-sample/pkg/cache"
 	"go-rest-api-sample/pkg/models"
 	"go-rest-api-sample/pkg/repositories"
 	"io"
 	"net/http"
 )
 
-func GetProducts(writer http.ResponseWriter, request *http.Request) {
-	data := repositories.ProductRepositoryInstant.GetAll()
+var redisCache = cache.NewRedis()
 
-	content, err := json.Marshal(data)
-	if err != nil {
-		panic("Could not serialize data to byte array " + err.Error())
-	}
-	writer.Write(content)
+func GetProducts(writer http.ResponseWriter, request *http.Request) {
+	data := redisCache.Get()
+	writer.Write(data)
 	writer.WriteHeader(200)
 }
 
@@ -54,10 +51,20 @@ func CreateProduct(writer http.ResponseWriter, request *http.Request) {
 		panic("Could not serialize data to byte array " + err.Error())
 	}
 
-	fmt.Println(product)
 	repositories.ProductRepositoryInstant.Create(product)
+	UpdateRedis(err)
+
 	writer.WriteHeader(200)
 
+}
+
+func UpdateRedis(err error) {
+	products := repositories.ProductRepositoryInstant.GetAll()
+	productByArray, err := json.Marshal(products)
+	if err != nil {
+		panic("Could not serialize product array after creating" + err.Error())
+	}
+	redisCache.Put(productByArray)
 }
 
 func DeleteProduct(writer http.ResponseWriter, request *http.Request) {
